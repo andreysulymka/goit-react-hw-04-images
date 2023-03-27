@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import Loader from "./Loader/Loader";
 import Searchbar from "./Searchbar";
 import { getPhotos } from "./services/getPhotos";
@@ -8,81 +8,85 @@ import LoadMoreButton from "./LoadMoreBtn/LoadMoreBtn";
 import { Base, Container } from "./App.styled";
 import Notiflix from 'notiflix';
 
-export default class App extends Component {
-  state = {
-    searchText: '',
-    isLoading: false,
-    photos: [],
-    page: 1,
-   showModal: false,
-    modalImgSrc: "",
-    showBTN: false,
-  };
+export default function App() {
+  
+  const [searchText, setSearchText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [photos, setPhotos] = useState([]);
+  const [page, setPage] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+  const [modalImgSrc, setModalImgSrc] = useState('');
+  const [showBTN, setShowBTN] = useState(false);
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.searchText !== this.state.searchText || prevState.page !== this.state.page) {
-      this.setState({ isLoading: true });
-      this.loadPhotos();
-    }
-  }
+  useEffect(() => {
 
- loadPhotos = () => {
-   const { searchText, page } = this.state;
-    getPhotos(searchText, page)  
+    const loadPhotos = () => {
+      getPhotos(searchText, page)  
     .then((photos) => {
       if (photos.hits.length === 0) {
         
         throw new Error(`No photos found for "${searchText}"`);
       } else {
-        this.setState((prevState) => ({
-          photos: [...prevState.photos, ...photos.hits],
-          showBTN: page < Math.ceil(photos.totalHits / 12),
-        }));
+        setPhotos((prevState) => [...prevState, ...photos.hits]);
+        setShowBTN(photos.totalHits > 12 && page < Math.ceil(photos.totalHits / 12))
       }
     })
     .catch((error) => {
       Notiflix.Notify.failure(error.message);
-      this.setState({ showBTN: false });
+      setShowBTN(false );
     })
     .finally(() => {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     });
 };
+    if (searchText.trim() === '') {
+      return;
+    }
+    setIsLoading(true);
+    loadPhotos()
+      }, [searchText, page, showBTN]);
+
+
 
    
-  handleFormSubmit = (inputSearch) => {
-    this.setState({ searchText: inputSearch, photos: [], page: 1  });
-  };
+  const handleFormSubmit = (inputSearch) => {
+    setSearchText(inputSearch);
+    setPhotos([]);
+    setPage(prevState => prevState + 1)
+      };
 
-  handleLoadMore = () => {
-    console.log("Єта кнопка")
-    this.setState((prevState) => ({ page: prevState.page + 1 }));
+  const handleLoadMore = () => {    
+    setPage(prevState => prevState + 1);
   };
  
-modalOpen = e => {
-    if(e.target.nodeName === 'IMG') {
-      this.setState({showModal: true, modalImgSrc: e.target.getAttribute("data-modal")})
+  const modalOpen = e => {
+    if (e.target.nodeName === 'IMG') {
+      setShowModal(true);
+      setModalImgSrc(e.target.getAttribute("data-modal"))
+      };
+  };
+
+  const modalClose = () => {
+    setShowModal(false);
+    setModalImgSrc('')
     };
-  };
 
-  modalClose = () => {
-    this.setState({showModal: false, modalImgSrc: ""});
-  };
-
-
-  render() {
-    const { photos, isLoading,showModal, modalImgSrc, modalImgAlt, showBTN } = this.state;
-    return (
+  const modalImgAlt = 'Image description';
+return (
       <Base>
       <Container>
-        <Searchbar onSearch={this.handleFormSubmit} />
+        <Searchbar onSearch={handleFormSubmit} />
         {isLoading && <Loader />}
-        {photos && photos.length > 0 && (<ImageGallery photos={photos} modalOpen={this.modalOpen} />
+        {photos && photos.length > 0 && (<ImageGallery photos={photos} modalOpen={modalOpen} />
           )}
-          {showBTN && <LoadMoreButton onClick={this.handleLoadMore}/>}
-        {showModal  && <Modal modalClose={this.modalClose} children={<img src={modalImgSrc} alt={modalImgAlt}/>}/>}
+          {showBTN && <LoadMoreButton onClick={handleLoadMore}/>}
+        {showModal  && <Modal modalClose={modalClose} children={<img src={modalImgSrc} alt={modalImgAlt}/>}/>}
         </Container>
         </Base>
     );
-  }
 }
+
+  
+
+
+ 

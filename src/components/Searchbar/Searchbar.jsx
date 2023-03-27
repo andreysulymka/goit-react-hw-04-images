@@ -9,7 +9,7 @@ export default function Searchbar({onSearch}) {
   const [value, setValue] = useState('')
 
  const handleChange = event => {
-        setValue({value: event.currentTarget.value.toLowerCase()})
+        setValue(event.currentTarget.value.toLowerCase())
     };
 
   const handleSubmit = (e) => {
@@ -20,7 +20,7 @@ export default function Searchbar({onSearch}) {
             return;
         }
         onSearch(value)
-        setValue({value: ''})
+        setValue('')
     }
 
 return (
@@ -44,6 +44,8 @@ return (
 
 
 Searchbar.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
   onSubmit: PropTypes.func,
 };
 
