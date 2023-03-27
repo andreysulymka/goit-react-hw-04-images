@@ -1,33 +1,31 @@
 import React from "react";
 import PropTypes from 'prop-types';
-import { Component } from "react";
+import { useState } from "react";
 import Notiflix from 'notiflix';
 import {Search, SearchBTN, SearchBTNLabel, SearchForm, SearchInput } from "./Searchbar.styled";
 
-export default class Searchbar extends Component {
-  state = {
-   value: '',
-    };
-    
-    handleChange = event => {
-        this.setState({value: event.currentTarget.value.toLowerCase()})
+export default function Searchbar({onSearch}) {
+  
+  const [value, setValue] = useState('')
+
+ const handleChange = event => {
+        setValue({value: event.currentTarget.value.toLowerCase()})
     };
 
-    handleSubmit = (e) => {
+  const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (this.state.value.trim() === '') {
+        if (value.trim() === '') {
             Notiflix.Notify.failure('Введіть пошуковий запит');;
             return;
         }
-        this.props.onSearch(this.state.value)
-        this.setState({value: ''})
+        onSearch(value)
+        setValue({value: ''})
     }
-  
-  render() {
-      return (
+
+return (
         <Search>
-  <SearchForm onSubmit={this.handleSubmit}>
+  <SearchForm onSubmit={handleSubmit}>
     <SearchBTN type="submit">
       <SearchBTNLabel>Search</SearchBTNLabel>
     </SearchBTN>
@@ -35,18 +33,17 @@ export default class Searchbar extends Component {
     <SearchInput
       type="text"
     placeholder="Search images and photos"
-                      onChange={this.handleChange}
-                      value={this.state.value}
+                      onChange={handleChange}
+                      value={value}
     />
   </SearchForm>
 </Search>
     )
-  }
+
 }
 
+
 Searchbar.propTypes = {
-  value: PropTypes.string,
-  onChange: PropTypes.func,
   onSubmit: PropTypes.func,
 };
 
