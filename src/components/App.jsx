@@ -44,7 +44,7 @@ export default function App() {
     }
     setIsLoading(true);
     loadPhotos()
-      }, [searchText, page, showBTN]);
+      }, [searchText, page]);
 
 
 
@@ -52,7 +52,7 @@ export default function App() {
   const handleFormSubmit = (inputSearch) => {
     setSearchText(inputSearch);
     setPhotos([]);
-    setPage(prevState => prevState + 1)
+    setPage(1)
       };
 
   const handleLoadMore = () => {    
